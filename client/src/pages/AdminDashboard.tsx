@@ -4,8 +4,9 @@ import { useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Users, MapPin, DollarSign, LogOut, Plus } from "lucide-react";
+import { BarChart3, Users, MapPin, DollarSign, LogOut } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FacilityManager } from "@/components/FacilityManager";
 
 export default function AdminDashboard() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -158,46 +159,7 @@ export default function AdminDashboard() {
 
           {/* Facilities Tab */}
           <TabsContent value="facilities" className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">Parking Facilities</h2>
-              <Button className="btn-primary flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Add Facility
-              </Button>
-            </div>
-
-            {facilitiesQuery.isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[1, 2].map((i) => (
-                  <Card key={i} className="card-elevated p-6 animate-pulse">
-                    <div className="h-6 bg-slate-200 rounded mb-4"></div>
-                    <div className="h-4 bg-slate-200 rounded mb-2"></div>
-                    <div className="h-4 bg-slate-200 rounded w-2/3"></div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {facilitiesQuery.data?.map((facility) => (
-                  <Card key={facility.id} className="card-elevated p-6 hover:shadow-xl transition-all">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-bold text-slate-900">{facility.name}</h3>
-                      <p className="text-sm text-slate-600 mt-1">{facility.city}</p>
-                    </div>
-                    <div className="space-y-2 mb-4">
-                      <p className="text-sm text-slate-600">{facility.address}</p>
-                      <p className="text-sm font-medium text-slate-900">
-                        Total Slots: <span className="text-blue-600">{facility.totalSlots}</span>
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button className="btn-secondary text-sm flex-1">Edit</Button>
-                      <Button className="btn-ghost text-sm flex-1">View Slots</Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
+            <FacilityManager />
           </TabsContent>
 
           {/* Bookings Tab */}

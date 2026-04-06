@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, DollarSign, Plus, LogOut, User, Car } from "lucide-react";
+import { MapPin, Clock, DollarSign, LogOut, User } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SlotBrowser } from "@/components/SlotBrowser";
+import { VehicleManager } from "@/components/VehicleManager";
 
 export default function UserDashboard() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -141,9 +143,8 @@ export default function UserDashboard() {
             </div>
 
             {selectedFacility && (
-              <div className="mt-8 p-6 bg-white rounded-xl border border-slate-200">
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Slots at Selected Facility</h3>
-                <p className="text-slate-600">Slot booking interface would be displayed here</p>
+              <div className="mt-8">
+                <SlotBrowser facilityId={selectedFacility} />
               </div>
             )}
           </TabsContent>
@@ -238,40 +239,7 @@ export default function UserDashboard() {
             </Card>
 
             <Card className="card-elevated p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <Car className="w-5 h-5" />
-                My Vehicles
-              </h3>
-              
-              {userVehiclesQuery.isLoading ? (
-                <p className="text-slate-600">Loading vehicles...</p>
-              ) : userVehiclesQuery.data && userVehiclesQuery.data.length > 0 ? (
-                <div className="space-y-4 mb-4">
-                  {userVehiclesQuery.data.map((vehicle) => (
-                    <div key={vehicle.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-bold text-slate-900">{vehicle.licensePlate}</p>
-                          <p className="text-sm text-slate-600">{vehicle.model} ({vehicle.vehicleType})</p>
-                          {vehicle.color && <p className="text-sm text-slate-600">Color: {vehicle.color}</p>}
-                        </div>
-                        {vehicle.isDefault && (
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-                            Default
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-slate-600 mb-4">No vehicles added yet</p>
-              )}
-              
-              <Button className="btn-primary w-full flex items-center justify-center gap-2">
-                <Plus className="w-4 h-4" />
-                Add Vehicle
-              </Button>
+              <VehicleManager />
             </Card>
           </TabsContent>
         </Tabs>

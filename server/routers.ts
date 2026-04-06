@@ -136,6 +136,13 @@ export const appRouter = router({
         await db.updateFacility(facilityId, updateData);
         return { success: true };
       }),
+
+    delete: adminProcedure
+      .input(z.object({ facilityId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteFacility(input.facilityId);
+        return { success: true };
+      }),
   }),
 
   // ==================== PARKING SLOTS ====================

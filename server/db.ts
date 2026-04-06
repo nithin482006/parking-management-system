@@ -321,3 +321,9 @@ export async function updatePricingRule(ruleId: number, data: Partial<typeof pri
 function or(...conditions: any[]) {
   return conditions.reduce((acc, cond) => acc || cond);
 }
+
+export async function deleteFacility(facilityId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(parkingFacilities).where(eq(parkingFacilities.id, facilityId));
+}

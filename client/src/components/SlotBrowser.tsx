@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, DollarSign, ChevronRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { BookingForm } from "./BookingForm";
 
 interface SlotBrowserProps {
   facilityId: number;
@@ -13,6 +14,7 @@ export function SlotBrowser({ facilityId, onSelectSlot }: SlotBrowserProps) {
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [startTime, setStartTime] = useState<string>("09:00");
   const [endTime, setEndTime] = useState<string>("17:00");
+  const [selectedSlotForBooking, setSelectedSlotForBooking] = useState<{ id: number; pricePerHour: string } | null>(null);
 
   const startDateTime = new Date(`${startDate}T${startTime}`);
   const endDateTime = new Date(`${startDate}T${endTime}`);
@@ -105,17 +107,17 @@ export function SlotBrowser({ facilityId, onSelectSlot }: SlotBrowserProps) {
           </div>
         ) : slotsQuery.data && slotsQuery.data.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {slotsQuery.data.map((slot) => (
-                  <Card
-                    key={slot.id}
-                    className={`border-2 p-4 cursor-pointer transition-all hover:shadow-lg ${getStatusColor(slot.status || 'available')}`}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="text-lg font-bold text-slate-900">{slot.slotNumber}</h4>
-                        <p className="text-sm text-slate-600">{slot.level || 'Ground'}</p>
-                      </div>
-                      {getStatusBadge(slot.status || 'available')}
+            {slotsQuery.data.map((slot) => (
+              <Card
+                key={slot.id}
+                className={`border-2 p-4 cursor-pointer transition-all hover:shadow-lg ${getStatusColor(slot.status || 'available')}`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-900">{slot.slotNumber}</h4>
+                    <p className="text-sm text-slate-600">{slot.level || 'Ground'}</p>
+                  </div>
+                  {getStatusBadge(slot.status || 'available')}
                 </div>
 
                 <div className="space-y-2 mb-4">
@@ -137,7 +139,7 @@ export function SlotBrowser({ facilityId, onSelectSlot }: SlotBrowserProps) {
 
                 {(slot.status === 'available' || !slot.status) && (
                   <Button
-                    onClick={() => onSelectSlot?.(slot.id)}
+                    onClick={() => setSelectedSlotForBooking({ id: slot.id, pricePerHour: slot.pricePerHour.toString() })}
                     className="w-full btn-primary flex items-center justify-center gap-2 text-sm"
                   >
                     Book Now <ChevronRight className="w-4 h-4" />
@@ -153,6 +155,22 @@ export function SlotBrowser({ facilityId, onSelectSlot }: SlotBrowserProps) {
           </Card>
         )}
       </div>
+
+      {/* Booking Form Modal */}
+      {selectedSlotForBooking && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <BookingForm
+            slotId={selectedSlotForBooking.id}
+            facilityId={facilityId}
+            pricePerHour={selectedSlotForBooking.pricePerHour}
+            onClose={() => setSelectedSlotForBooking(null)}
+            onSuccess={() => {
+              setSelectedSlotForBooking(null);
+              slotsQuery.refetch();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
