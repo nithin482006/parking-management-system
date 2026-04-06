@@ -175,3 +175,75 @@
     }
   }
 }
+
+/* Elegant component styles for parking management */
+@layer components {
+  .btn-primary {
+    @apply px-6 py-2.5 bg-accent text-accent-foreground rounded-lg font-medium hover:opacity-90 transition-all duration-200 shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2.5 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-all duration-200;
+  }
+
+  .btn-ghost {
+    @apply px-6 py-2.5 text-foreground hover:bg-muted rounded-lg font-medium transition-all duration-200;
+  }
+
+  .card-elevated {
+    @apply bg-card rounded-xl border border-border shadow-lg hover:shadow-xl transition-shadow duration-300;
+  }
+
+  .badge-available {
+    @apply inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium;
+  }
+
+  .badge-occupied {
+    @apply inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-medium;
+  }
+
+  .badge-reserved {
+    @apply inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium;
+  }
+
+  .badge-maintenance {
+    @apply inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-800 text-sm font-medium;
+  }
+
+  .input-elegant {
+    @apply w-full px-4 py-2.5 bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200;
+  }
+
+  .section-divider {
+    @apply h-px bg-gradient-to-r from-transparent via-border to-transparent;
+  }
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
