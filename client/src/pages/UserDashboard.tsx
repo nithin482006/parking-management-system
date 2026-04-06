@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, DollarSign, LogOut, User } from "lucide-react";
+import { MapPin, Clock, DollarSign, LogOut } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SlotBrowser } from "@/components/SlotBrowser";
 import { VehicleManager } from "@/components/VehicleManager";
+import { ProfileEditor } from "@/components/ProfileEditor";
+import { BookingManager } from "@/components/BookingManager";
 
 export default function UserDashboard() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -151,92 +153,17 @@ export default function UserDashboard() {
 
           {/* My Bookings Tab */}
           <TabsContent value="bookings" className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-900">My Bookings</h2>
-            
-            {userBookingsQuery.isLoading ? (
-              <div className="space-y-4">
-                {[1, 2].map((i) => (
-                  <Card key={i} className="card-elevated p-6 animate-pulse">
-                    <div className="h-6 bg-slate-200 rounded mb-4"></div>
-                    <div className="h-4 bg-slate-200 rounded mb-2"></div>
-                    <div className="h-4 bg-slate-200 rounded w-2/3"></div>
-                  </Card>
-                ))}
-              </div>
-            ) : userBookingsQuery.data && userBookingsQuery.data.length > 0 ? (
-              <div className="space-y-4">
-                  {userBookingsQuery.data.map((booking) => (
-                    <Card key={booking.id} className="card-elevated p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-bold text-slate-900">Booking #{booking.bookingReference || 'N/A'}</h3>
-                          <p className="text-sm text-slate-600 mt-1">
-                            {getBookingStatusBadge(booking.status || 'pending')}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-blue-600">${Number(booking.totalPrice).toFixed(2)}</p>
-                        <p className="text-sm text-slate-600">Total Price</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <p className="text-sm text-slate-600">Start Time</p>
-                        <p className="font-medium text-slate-900">
-                          {new Date(booking.startTime).toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-slate-600">End Time</p>
-                        <p className="font-medium text-slate-900">
-                          {new Date(booking.endTime).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      {booking.status === 'confirmed' && (
-                        <>
-                          <Button className="btn-secondary text-sm">Extend</Button>
-                          <Button className="btn-ghost text-sm text-red-600">Cancel</Button>
-                        </>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="card-elevated p-12 text-center">
-                <MapPin className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-600">No bookings yet. Start by booking a parking slot!</p>
-              </Card>
-            )}
+            <BookingManager />
           </TabsContent>
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
             <h2 className="text-2xl font-bold text-slate-900">My Profile</h2>
             
-            <Card className="card-elevated p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Personal Information
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm text-slate-600">Name</label>
-                  <p className="text-lg font-medium text-slate-900">{user.name || 'Not set'}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-slate-600">Email</label>
-                  <p className="text-lg font-medium text-slate-900">{user.email || 'Not set'}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-slate-600">Phone</label>
-                  <p className="text-lg font-medium text-slate-900">{user.phone || 'Not set'}</p>
-                </div>
-              </div>
-              <Button className="btn-secondary mt-6">Edit Profile</Button>
-            </Card>
+            <ProfileEditor
+              initialName={user.name || ""}
+              initialPhone={user.phone || ""}
+            />
 
             <Card className="card-elevated p-6">
               <VehicleManager />

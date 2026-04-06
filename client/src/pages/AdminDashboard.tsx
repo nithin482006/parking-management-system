@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart3, Users, MapPin, DollarSign, LogOut } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FacilityManager } from "@/components/FacilityManager";
+import { SlotManager } from "@/components/SlotManager";
 
 export default function AdminDashboard() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -160,6 +161,19 @@ export default function AdminDashboard() {
           {/* Facilities Tab */}
           <TabsContent value="facilities" className="space-y-6">
             <FacilityManager />
+            {facilitiesQuery.data && facilitiesQuery.data.length > 0 && (
+              <div className="mt-8 space-y-6">
+                <h3 className="text-xl font-bold text-slate-900">Manage Slots</h3>
+                {facilitiesQuery.data.map((facility) => (
+                  <Card key={facility.id} className="card-elevated p-6">
+                    <h4 className="text-lg font-bold text-slate-900 mb-4">
+                      {facility.name}
+                    </h4>
+                    <SlotManager facilityId={facility.id} />
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Bookings Tab */}
