@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,12 +11,17 @@ export default function HomeEnhanced() {
   const { user, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
 
-  if (isAuthenticated && user) {
-    if (user.role === 'admin') {
-      navigate('/admin/dashboard');
-    } else {
-      navigate('/user/dashboard');
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
     }
+  }, [isAuthenticated, user, navigate]);
+
+  if (isAuthenticated && user) {
     return null;
   }
 
