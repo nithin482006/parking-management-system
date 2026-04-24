@@ -6,6 +6,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import * as db from "./db";
 import { nanoid } from "nanoid";
+import { generateCompletionCode } from "../drizzle/schema";
 
 // Helper to ensure admin access
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -258,12 +259,14 @@ export const appRouter = router({
         }
 
         const bookingReference = `BK-${nanoid(10).toUpperCase()}`;
+        const completionCode = generateCompletionCode();
         await db.createBooking({
           ...input,
           userId: ctx.user.id,
           status: 'confirmed',
           paymentStatus: 'paid',
           bookingReference,
+          completionCode,
         });
 
         // Update slot status
@@ -276,7 +279,7 @@ export const appRouter = router({
           reason: 'Initial booking',
         });
 
-        return { success: true, bookingReference };
+        return { success: true, bookingReference, completionCode };
       }),
 
     extend: protectedProcedure
@@ -338,6 +341,33 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await db.updateBooking(input.bookingId, { status: input.status });
         return { success: true };
+      }),
+
+    verifyCompletionCode: adminProcedure
+      .input(z.object({
+        bookingId: z.number(),
+        completionCode: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const booking = await db.getBookingById(input.bookingId);
+        if (!booking) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Booking not found' });
+        }
+
+        if (booking.completionCode !== input.completionCode.toUpperCase()) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid completion code' });
+        }
+
+        await db.updateBooking(input.bookingId, { status: 'completed' });
+        await db.updateSlot(booking.slotId, { status: 'available' });
+
+        await db.createBookingHistory({
+          bookingId: input.bookingId,
+          action: 'completed',
+          reason: 'Admin verified completion code',
+        });
+
+        return { success: true, message: 'Booking completed successfully' };
       }),
   }),
 

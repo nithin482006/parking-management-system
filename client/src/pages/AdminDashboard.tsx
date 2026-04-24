@@ -1,6 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,15 @@ import { BarChart3, Users, MapPin, DollarSign, LogOut } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FacilityManager } from "@/components/FacilityManager";
 import { SlotManager } from "@/components/SlotManager";
+import { BookingDetailModal } from "@/components/BookingDetailModal";
+import { CompletionCodeModal } from "@/components/CompletionCodeModal";
 
 export default function AdminDashboard() {
   const { user, logout, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showCodeModal, setShowCodeModal] = useState(false);
 
   // tRPC queries
   const facilitiesQuery = trpc.facilities.getAll.useQuery();
@@ -224,7 +229,15 @@ export default function AdminDashboard() {
                           ${Number(booking.totalPrice).toFixed(2)}
                         </td>
                         <td className="px-6 py-4 text-sm">
-                          <Button className="btn-ghost text-xs">View</Button>
+                          <Button
+                            className="btn-ghost text-xs"
+                            onClick={() => {
+                              setSelectedBooking(booking);
+                              setShowDetailModal(true);
+                            }}
+                          >
+                            View
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -290,6 +303,29 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Modals */}
+      <BookingDetailModal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        booking={selectedBooking}
+        isAdmin={true}
+        onCompleteClick={() => {
+          setShowDetailModal(false);
+          setShowCodeModal(true);
+        }}
+      />
+
+      <CompletionCodeModal
+        isOpen={showCodeModal}
+        onClose={() => setShowCodeModal(false)}
+        bookingId={selectedBooking?.id || 0}
+        bookingReference={selectedBooking?.bookingReference || ''}
+        onSuccess={() => {
+          allBookingsQuery.refetch();
+          setSelectedBooking(null);
+        }}
+      />
     </div>
   );
 }

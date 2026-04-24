@@ -93,6 +93,7 @@ export const bookings = mysqlTable("bookings", {
   totalPrice: decimal("totalPrice", { precision: 10, scale: 2 }).notNull(),
   paymentStatus: mysqlEnum("paymentStatus", ["unpaid", "paid", "refunded"]).default("unpaid"),
   bookingReference: varchar("bookingReference", { length: 50 }).unique(),
+  completionCode: varchar("completionCode", { length: 20 }).unique(),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -100,6 +101,15 @@ export const bookings = mysqlTable("bookings", {
 
 export type Booking = typeof bookings.$inferSelect;
 export type InsertBooking = typeof bookings.$inferInsert;
+
+export function generateCompletionCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
 
 /**
  * Booking history for tracking changes and extensions

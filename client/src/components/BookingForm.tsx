@@ -25,6 +25,8 @@ export function BookingForm({
   const [endTime, setEndTime] = useState<string>("17:00");
   const [vehicleId, setVehicleId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [completionCode, setCompletionCode] = useState<string>("");
+  const [bookingReference, setBookingReference] = useState<string>("");
 
   const vehiclesQuery = trpc.user.getVehicles.useQuery();
   const createBookingMutation = trpc.bookings.create.useMutation();
@@ -50,7 +52,7 @@ export function BookingForm({
       const endDateTime = new Date(`${startDate}T${endTime}`);
       const totalPrice = calculatePrice();
 
-      await createBookingMutation.mutateAsync({
+      const result = await createBookingMutation.mutateAsync({
         slotId,
         vehicleId: parseInt(vehicleId),
         facilityId,
@@ -59,15 +61,47 @@ export function BookingForm({
         totalPrice,
       });
 
-      toast.success("Booking confirmed!");
+      setCompletionCode(result.completionCode);
+      setBookingReference(result.bookingReference);
+      toast.success("Booking confirmed! Save your completion code.");
       onSuccess?.();
-      onClose?.();
     } catch (error) {
       toast.error("Failed to create booking");
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (completionCode) {
+    return (
+      <Card className="card-elevated p-6 max-w-md w-full">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900">Booking Confirmed!</h3>
+          <p className="text-sm text-slate-600">Your parking slot has been reserved</p>
+          
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+            <p className="text-xs text-blue-600 font-medium">Booking Reference</p>
+            <p className="text-lg font-mono font-bold text-blue-900">{bookingReference}</p>
+          </div>
+          
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-2">
+            <p className="text-xs text-green-600 font-medium">Your Completion Code</p>
+            <p className="text-3xl font-mono font-bold tracking-widest text-green-600">{completionCode}</p>
+            <p className="text-xs text-green-700">Share this code with the admin when you arrive</p>
+          </div>
+          
+          <Button onClick={onClose} className="w-full btn-primary">
+            Close
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="card-elevated p-6 max-w-md w-full">
