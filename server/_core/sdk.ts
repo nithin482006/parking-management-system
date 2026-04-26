@@ -212,19 +212,22 @@ class SDKServer {
       });
       const { openId, appId, name } = payload as Record<string, unknown>;
 
+      // openId and appId are required, but name can be empty for new users
       if (
         !isNonEmptyString(openId) ||
-        !isNonEmptyString(appId) ||
-        !isNonEmptyString(name)
+        !isNonEmptyString(appId)
       ) {
-        console.warn("[Auth] Session payload missing required fields");
+        console.warn("[Auth] Session payload missing required fields (openId or appId)");
         return null;
       }
+
+      // Allow name to be empty string or null for new users
+      const nameValue = typeof name === "string" ? name : "";
 
       return {
         openId,
         appId,
-        name,
+        name: nameValue,
       };
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));
