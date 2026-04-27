@@ -70,3 +70,7 @@
 - [x] Add booking completion logic to mark booking as "completed"
 - [x] Display completion code to user after booking confirmation
 - [x] Add completion_code field to bookings table in database
+- [x] Create profile completion page for new users
+- [x] Add profileCompleted flag to users table
+- [x] Redirect new users to profile completion before dashboard access
+- [x] Require name and phone number on profile completion form

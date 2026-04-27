@@ -26,9 +26,13 @@ export default function AdminDashboard() {
     if (!isAuthenticated || user?.role !== 'admin') {
       navigate('/');
     }
+    // Redirect to profile completion if not completed
+    if (isAuthenticated && user && !user.profileCompleted) {
+      navigate('/profile/complete');
+    }
   }, [isAuthenticated, user, navigate]);
 
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== 'admin' || !user.profileCompleted) {
     return null;
   }
 

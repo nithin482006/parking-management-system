@@ -40,8 +40,21 @@ export const appRouter = router({
       .input(z.object({
         name: z.string().optional(),
         phone: z.string().optional(),
+        profileCompleted: z.boolean().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        // If trying to mark profile as completed, validate required fields
+        if (input.profileCompleted === true) {
+          if (!input.name || !input.name.trim()) {
+            throw new TRPCError({ code: 'BAD_REQUEST', message: 'Name is required to complete profile' });
+          }
+          if (!input.phone || !input.phone.trim()) {
+            throw new TRPCError({ code: 'BAD_REQUEST', message: 'Phone number is required to complete profile' });
+          }
+          if (input.phone.trim().length < 10) {
+            throw new TRPCError({ code: 'BAD_REQUEST', message: 'Phone number must be at least 10 digits' });
+          }
+        }
         await db.updateUser(ctx.user.id, input);
         return { success: true };
       }),

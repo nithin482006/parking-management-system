@@ -13,7 +13,10 @@ export default function HomeEnhanced() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'admin') {
+      // Check if profile is completed
+      if (!user.profileCompleted) {
+        navigate('/profile/complete');
+      } else if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
         navigate('/user/dashboard');
