@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, DollarSign, LogOut } from "lucide-react";
+import { MapPin, Clock, DollarSign, LogOut, Menu, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SlotBrowser } from "@/components/SlotBrowser";
 import { VehicleManager } from "@/components/VehicleManager";
@@ -56,36 +56,36 @@ export default function UserDashboard() {
   };
 
   const getBookingStatusBadge = (status: string) => {
-    const colors: Record<string, string> = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      confirmed: 'bg-green-100 text-green-800',
-      active: 'bg-blue-100 text-blue-800',
-      completed: 'bg-gray-100 text-gray-800',
-      cancelled: 'bg-red-100 text-red-800',
+    const badgeMap: Record<string, string> = {
+      pending: 'badge-reserved',
+      confirmed: 'badge-available',
+      active: 'badge-available',
+      completed: 'badge-maintenance',
+      cancelled: 'badge-occupied',
     };
     return (
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${colors[status] || ''}`}>
+      <span className={badgeMap[status] || 'badge-maintenance'}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Header - Glass */}
+      <header className="glass-base sticky top-0 z-40 border-b">
         <div className="container flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
+              <MapPin className="w-6 h-6 text-white" />
             </div>
-            <span className="font-bold text-lg text-slate-900">ParkHub</span>
+            <span className="font-bold text-lg bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">ParkHub</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-600">{user.name || user.email}</span>
+            <span className="text-sm text-muted-foreground">{user.name || user.email}</span>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"
+              className="btn-glass flex items-center gap-2"
             >
               <LogOut className="w-4 h-4" />
               Logout
@@ -97,52 +97,53 @@ export default function UserDashboard() {
       {/* Main Content */}
       <main className="container py-8">
         <Tabs defaultValue="book" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="book">Book Parking</TabsTrigger>
-            <TabsTrigger value="bookings">My Bookings</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsList className="glass-base inline-flex gap-2 p-1 rounded-full">
+            <TabsTrigger value="book" className="rounded-full px-6 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white transition-all">Book Parking</TabsTrigger>
+            <TabsTrigger value="bookings" className="rounded-full px-6 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white transition-all">My Bookings</TabsTrigger>
+            <TabsTrigger value="profile" className="rounded-full px-6 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white transition-all">Profile</TabsTrigger>
           </TabsList>
 
           {/* Book Parking Tab */}
           <TabsContent value="book" className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Available Parking Facilities</h2>
+              <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Available Parking Facilities</h2>
+              <p className="text-muted-foreground mb-6">Select a facility to view available parking slots</p>
               
               {facilitiesQuery.isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3].map((i) => (
-                    <Card key={i} className="card-elevated p-6 animate-pulse">
-                      <div className="h-6 bg-slate-200 rounded mb-4"></div>
-                      <div className="h-4 bg-slate-200 rounded mb-2"></div>
-                      <div className="h-4 bg-slate-200 rounded w-2/3"></div>
-                    </Card>
+                    <div key={i} className="glass-card animate-shimmer">
+                      <div className="h-6 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl mb-4"></div>
+                      <div className="h-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg mb-2"></div>
+                      <div className="h-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg w-2/3"></div>
+                    </div>
                   ))}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {facilitiesQuery.data?.map((facility) => (
-                    <Card
+                    <div
                       key={facility.id}
-                      className="card-elevated p-6 cursor-pointer hover:shadow-xl transition-all"
+                      className="glass-card cursor-pointer group"
                       onClick={() => setSelectedFacility(facility.id)}
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div>
-                          <h3 className="text-lg font-bold text-slate-900">{facility.name}</h3>
-                          <p className="text-sm text-slate-600 flex items-center gap-1 mt-1">
-                            <MapPin className="w-4 h-4" />
+                          <h3 className="text-lg font-bold text-foreground">{facility.name}</h3>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                            <MapPin className="w-4 h-4 text-cyan-400" />
                             {facility.city}
                           </p>
                         </div>
                       </div>
                       <div className="space-y-2 mb-4">
-                        <p className="text-sm text-slate-600">{facility.address}</p>
-                        <p className="text-sm font-medium text-slate-900">
-                          Total Slots: <span className="text-blue-600">{facility.totalSlots}</span>
+                        <p className="text-sm text-muted-foreground">{facility.address}</p>
+                        <p className="text-sm font-medium text-foreground">
+                          Total Slots: <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">{facility.totalSlots}</span>
                         </p>
                       </div>
-                      <Button className="w-full btn-primary">View Slots</Button>
-                    </Card>
+                      <button className="btn-liquid w-full">View Slots</button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -157,21 +158,25 @@ export default function UserDashboard() {
 
           {/* My Bookings Tab */}
           <TabsContent value="bookings" className="space-y-6">
+            <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">My Bookings</h2>
             <BookingManager />
           </TabsContent>
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-900">My Profile</h2>
+            <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">My Profile</h2>
             
-            <ProfileEditor
-              initialName={user.name || ""}
-              initialPhone={user.phone || ""}
-            />
+            <div className="glass-card">
+              <ProfileEditor
+                initialName={user.name || ""}
+                initialPhone={user.phone || ""}
+              />
+            </div>
 
-            <Card className="card-elevated p-6">
+            <div className="glass-card">
+              <h3 className="text-xl font-semibold text-foreground mb-4">My Vehicles</h3>
               <VehicleManager />
-            </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </main>
