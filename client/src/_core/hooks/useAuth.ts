@@ -1,7 +1,8 @@
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { TRPCClientError } from "@trpc/client";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getOAuthErrorMessage, isOAuthSupported } from "../oauthConfig";
 
 type UseAuthOptions = {
   redirectOnUnauthenticated?: boolean;
@@ -9,8 +10,19 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
-    options ?? {};
+  const [oauthError, setOauthError] = useState<string | null>(null);
+  
+  // Determine redirect path with error handling
+  let redirectPath: string;
+  try {
+    redirectPath = options?.redirectPath ?? getLoginUrl();
+  } catch (error) {
+    // OAuth is not supported in this environment
+    redirectPath = '';
+    setOauthError(getOAuthErrorMessage() || 'OAuth authentication is not available');
+  }
+
+  const { redirectOnUnauthenticated = false } = options ?? {};
   const utils = trpc.useUtils();
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
@@ -51,6 +63,7 @@ export function useAuth(options?: UseAuthOptions) {
       loading: meQuery.isLoading || logoutMutation.isPending,
       error: meQuery.error ?? logoutMutation.error ?? null,
       isAuthenticated: Boolean(meQuery.data),
+      oauthError,
     };
   }, [
     meQuery.data,
@@ -58,6 +71,7 @@ export function useAuth(options?: UseAuthOptions) {
     meQuery.isLoading,
     logoutMutation.error,
     logoutMutation.isPending,
+    oauthError,
   ]);
 
   useEffect(() => {
@@ -65,9 +79,14 @@ export function useAuth(options?: UseAuthOptions) {
     if (meQuery.isLoading || logoutMutation.isPending) return;
     if (state.user) return;
     if (typeof window === "undefined") return;
+    if (!redirectPath) return; // OAuth not supported
     if (window.location.pathname === redirectPath) return;
 
-    window.location.href = redirectPath
+    try {
+      window.location.href = redirectPath;
+    } catch (error) {
+      console.error('[Auth] Failed to redirect to login:', error);
+    }
   }, [
     redirectOnUnauthenticated,
     redirectPath,

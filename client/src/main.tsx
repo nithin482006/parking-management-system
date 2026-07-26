@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
+import { isOAuthSupported, getOAuthErrorMessage } from "./_core/oauthConfig";
 import "./index.css";
 
 const queryClient = new QueryClient();
@@ -18,7 +19,21 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  window.location.href = getLoginUrl();
+  // Check if OAuth is supported before attempting redirect
+  if (!isOAuthSupported()) {
+    const errorMsg = getOAuthErrorMessage();
+    console.error('[OAuth] Cannot redirect to login:', errorMsg);
+    // Show error to user instead of redirecting
+    alert(errorMsg || 'Authentication is not available in this environment');
+    return;
+  }
+
+  try {
+    window.location.href = getLoginUrl();
+  } catch (err) {
+    console.error('[OAuth] Failed to redirect to login:', err);
+    alert('Authentication configuration error. Please contact support.');
+  }
 };
 
 queryClient.getQueryCache().subscribe(event => {

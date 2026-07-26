@@ -80,7 +80,21 @@
 - [x] Redesign home page with floating glass cards and animations
 - [x] Redesign user dashboard with glass UI components
 - [x] Redesign admin dashboard with glass stat cards and data grids
+- [x] Create reusable GlassCard, GlassNav, and StatCard components
 - [ ] Update component styles (SlotBrowser, BookingForm, etc.) with glass effects
 - [ ] Optimize animations and transitions for performance
 - [ ] Test responsive design on all breakpoints
 - [ ] Verify accessibility with glass effects
+
+
+## Phase 10: Google OAuth Redirect URI Bug Fix
+- [x] Identify OAuth configuration and redirect URI generation points
+- [x] Implement environment-aware redirect URI detection (localhost, preview, production)
+- [x] Create oauthConfig.ts utility with environment detection
+- [x] Update const.ts to use environment-aware redirect URI
+- [x] Add OAuth error handling in useAuth hook
+- [x] Add OAuth validation in main.tsx
+- [x] Add server-side OAuth configuration validation
+- [x] Update environment variables configuration
+- [x] Display user-friendly error messages for unsupported domains
+- [x] Create comprehensive OAuth configuration documentation
