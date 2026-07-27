@@ -1,7 +1,7 @@
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { TRPCClientError } from "@trpc/client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { getOAuthErrorMessage, isOAuthSupported } from "../oauthConfig";
 
 type UseAuthOptions = {
@@ -11,16 +11,24 @@ type UseAuthOptions = {
 
 export function useAuth(options?: UseAuthOptions) {
   const [oauthError, setOauthError] = useState<string | null>(null);
-  
-  // Determine redirect path with error handling
-  let redirectPath: string;
-  try {
-    redirectPath = options?.redirectPath ?? getLoginUrl();
-  } catch (error) {
-    // OAuth is not supported in this environment
-    redirectPath = '';
-    setOauthError(getOAuthErrorMessage() || 'OAuth authentication is not available');
-  }
+  const [redirectPath, setRedirectPath] = useState<string>('');
+
+  // Initialize OAuth configuration once
+  useEffect(() => {
+    try {
+      if (options?.redirectPath) {
+        setRedirectPath(options.redirectPath);
+      } else {
+        const url = getLoginUrl();
+        setRedirectPath(url);
+        setOauthError(null);
+      }
+    } catch (error) {
+      // OAuth is not supported in this environment
+      setRedirectPath('');
+      setOauthError(getOAuthErrorMessage() || 'OAuth authentication is not available');
+    }
+  }, [options?.redirectPath]);
 
   const { redirectOnUnauthenticated = false } = options ?? {};
   const utils = trpc.useUtils();
@@ -28,6 +36,7 @@ export function useAuth(options?: UseAuthOptions) {
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
+    enabled: true,
   });
 
   const logoutMutation = trpc.auth.logout.useMutation({
@@ -53,11 +62,16 @@ export function useAuth(options?: UseAuthOptions) {
     }
   }, [logoutMutation, utils]);
 
+  useEffect(() => {
+    if (meQuery.data) {
+      localStorage.setItem(
+        "manus-runtime-user-info",
+        JSON.stringify(meQuery.data)
+      );
+    }
+  }, [meQuery.data]);
+
   const state = useMemo(() => {
-    localStorage.setItem(
-      "manus-runtime-user-info",
-      JSON.stringify(meQuery.data)
-    );
     return {
       user: meQuery.data ?? null,
       loading: meQuery.isLoading || logoutMutation.isPending,
@@ -95,8 +109,11 @@ export function useAuth(options?: UseAuthOptions) {
     state.user,
   ]);
 
+
+
   return {
     ...state,
+    loginUrl: redirectPath,
     refresh: () => meQuery.refetch(),
     logout,
   };

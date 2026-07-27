@@ -1,30 +1,15 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Spotlight } from "@/components/ui/spotlight";
 import { ArrowRight, MapPin, Clock, DollarSign, Shield, Zap, Users } from "lucide-react";
-import { getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { GlassCard, GlassNav, StatCard } from "@/components/GlassCard";
 
 export default function HomeEnhanced() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loginUrl, oauthError } = useAuth();
   const [, navigate] = useLocation();
-  const [loginUrl, setLoginUrl] = useState<string | null>(null);
-  const [oauthError, setOauthError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Try to get login URL
-    try {
-      const url = getLoginUrl();
-      setLoginUrl(url);
-      setOauthError(null);
-    } catch (error) {
-      setLoginUrl(null);
-      setOauthError(error instanceof Error ? error.message : 'OAuth configuration error');
-    }
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -59,7 +44,7 @@ export default function HomeEnhanced() {
               Login
             </a>
           ) : oauthError ? (
-            <div className="px-6 py-3 rounded-full font-semibold text-red-400 bg-red-500/10 border border-red-500/30">
+            <div className="px-6 py-3 rounded-full font-semibold text-sm text-red-400 bg-red-500/10 border border-red-500/30 max-w-xs text-center">
               {oauthError}
             </div>
           ) : (
@@ -97,9 +82,15 @@ export default function HomeEnhanced() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href={getLoginUrl()} className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-200">
-                  Get Started <ArrowRight className="w-4 h-4" />
-                </a>
+                {loginUrl ? (
+                  <a href={loginUrl} className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-200">
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </a>
+                ) : (
+                  <button disabled className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-gray-600 text-gray-400 rounded-full font-semibold cursor-not-allowed">
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
                 <button className="px-8 py-3 rounded-full font-semibold text-foreground border border-muted-foreground/30 hover:bg-muted/10 transition-all duration-200">
                   Learn More
                 </button>
@@ -246,9 +237,15 @@ export default function HomeEnhanced() {
             <p className="text-muted-foreground text-lg mb-8">
               Join thousands of users already enjoying seamless parking management
             </p>
-            <a href={getLoginUrl()} className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-200">
-              Get Started Now <ArrowRight className="w-4 h-4" />
-            </a>
+            {loginUrl ? (
+              <a href={loginUrl} className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-200">
+                Get Started Now <ArrowRight className="w-4 h-4" />
+              </a>
+            ) : (
+              <button disabled className="inline-flex items-center gap-2 px-8 py-3 bg-gray-600 text-gray-400 rounded-full font-semibold cursor-not-allowed">
+                Get Started Now <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
           </GlassCard>
         </div>
       </section>
