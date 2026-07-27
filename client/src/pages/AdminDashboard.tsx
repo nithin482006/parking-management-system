@@ -1,6 +1,5 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,51 @@ import { FacilityManager } from "@/components/FacilityManager";
 import { SlotManager } from "@/components/SlotManager";
 import { BookingDetailModal } from "@/components/BookingDetailModal";
 import { CompletionCodeModal } from "@/components/CompletionCodeModal";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Line, Bar } from 'react-chartjs-2';
+import { useAuth } from "@/_core/hooks/useAuth";
+
+// Register ChartJS components
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
+
+// Helper functions to generate chart data
+function generateRevenueData(bookings: any[]) {
+  const data = Array(7).fill(0);
+  const now = new Date();
+  
+  bookings.forEach(booking => {
+    if (booking.status === 'completed' && booking.paymentStatus === 'paid') {
+      const bookingDate = new Date(booking.endTime);
+      const daysAgo = Math.floor((now.getTime() - bookingDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysAgo >= 0 && daysAgo < 7) {
+        data[6 - daysAgo] += Number(booking.totalPrice);
+      }
+    }
+  });
+  
+  return data.map(v => Math.round(v * 100) / 100);
+}
+
+function generateOccupancyData(bookings: any[], totalFacilities: number) {
+  const data = Array(7).fill(0);
+  const now = new Date();
+  const slotsPerFacility = 50; // Assuming 50 slots per facility
+  const totalSlots = totalFacilities * slotsPerFacility;
+  
+  bookings.forEach(booking => {
+    if (booking.status === 'active' || booking.status === 'confirmed') {
+      const bookingDate = new Date(booking.startTime);
+      const daysAgo = Math.floor((now.getTime() - bookingDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysAgo >= 0 && daysAgo < 7) {
+        data[6 - daysAgo]++;
+      }
+    }
+  });
+  
+  return data.map(v => totalSlots > 0 ? Math.round((v / totalSlots) * 100) : 0);
+}
 
 export default function AdminDashboard() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -22,6 +66,16 @@ export default function AdminDashboard() {
   const facilitiesQuery = trpc.facilities.getAll.useQuery();
   const allBookingsQuery = trpc.bookings.getAllBookings.useQuery({});
 
+  // Refetch data periodically for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      allBookingsQuery.refetch();
+      facilitiesQuery.refetch();
+    }, 30000); // Refetch every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, [allBookingsQuery, facilitiesQuery]);
+
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'admin') {
       navigate('/');
@@ -31,6 +85,8 @@ export default function AdminDashboard() {
       navigate('/profile/complete');
     }
   }, [isAuthenticated, user, navigate]);
+
+
 
   if (!user || user.role !== 'admin' || !user.profileCompleted) {
     return null;
@@ -49,6 +105,8 @@ export default function AdminDashboard() {
     }
     return sum;
   }, 0) || 0;
+  
+  const currentOccupancyRate = totalFacilities > 0 ? Math.round((totalBookings / (totalFacilities * 50)) * 100) : 0;
 
   const getBookingStatusBadge = (status: string) => {
     const badgeMap: Record<string, string> = {
@@ -267,6 +325,117 @@ export default function AdminDashboard() {
           <TabsContent value="analytics" className="space-y-6">
             <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Analytics & Reports</h2>
 
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Revenue Trend Chart */}
+              <div className="glass-card">
+                <h3 className="text-lg font-bold text-foreground mb-6">Revenue Trend (Last 7 Days)</h3>
+                <div style={{ height: '300px', position: 'relative' }}>
+                  <Line
+                    data={{
+                      labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                      datasets: [
+                        {
+                          label: 'Daily Revenue ($)',
+                          data: generateRevenueData(allBookingsQuery.data || []),
+                          borderColor: '#06B6D4',
+                          backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                          borderWidth: 2,
+                          tension: 0.4,
+                          fill: true,
+                          pointBackgroundColor: '#06B6D4',
+                          pointBorderColor: '#0EA5E9',
+                          pointRadius: 5,
+                          pointHoverRadius: 7,
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: true,
+                          labels: {
+                            color: '#F1F5F9',
+                            font: { size: 12 },
+                          },
+                        },
+                      },
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          ticks: { color: '#94A3B8' },
+                          grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                        },
+                        x: {
+                          ticks: { color: '#94A3B8' },
+                          grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                        },
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Occupancy Rate Chart */}
+              <div className="glass-card">
+                <h3 className="text-lg font-bold text-foreground mb-6">Occupancy Rate Trend (Last 7 Days)</h3>
+                <div style={{ height: '300px', position: 'relative' }}>
+                  <Bar
+                    data={{
+                      labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                      datasets: [
+                        {
+                          label: 'Occupancy Rate (%)',
+                          data: generateOccupancyData(allBookingsQuery.data || [], totalFacilities),
+                          backgroundColor: [
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                          ],
+                          borderColor: '#10B981',
+                          borderWidth: 2,
+                          borderRadius: 8,
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      indexAxis: 'x',
+                      plugins: {
+                        legend: {
+                          display: true,
+                          labels: {
+                            color: '#F1F5F9',
+                            font: { size: 12 },
+                          },
+                        },
+                      },
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          max: 100,
+                          ticks: { color: '#94A3B8' },
+                          grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                        },
+                        x: {
+                          ticks: { color: '#94A3B8' },
+                          grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                        },
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="glass-card">
                 <h3 className="text-lg font-bold text-foreground mb-4">Booking Status Distribution</h3>
