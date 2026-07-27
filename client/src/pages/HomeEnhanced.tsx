@@ -5,12 +5,26 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { ArrowRight, MapPin, Clock, DollarSign, Shield, Zap, Users } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { GlassCard, GlassNav, StatCard } from "@/components/GlassCard";
 
 export default function HomeEnhanced() {
   const { user, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
+  const [loginUrl, setLoginUrl] = useState<string | null>(null);
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Try to get login URL
+    try {
+      const url = getLoginUrl();
+      setLoginUrl(url);
+      setOauthError(null);
+    } catch (error) {
+      setLoginUrl(null);
+      setOauthError(error instanceof Error ? error.message : 'OAuth configuration error');
+    }
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -40,9 +54,19 @@ export default function HomeEnhanced() {
             </div>
             <span className="font-bold text-xl bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">ParkHub</span>
           </div>
-          <a href={getLoginUrl()} className="px-6 py-3 rounded-full font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-200">
-            Login
-          </a>
+          {loginUrl ? (
+            <a href={loginUrl} className="px-6 py-3 rounded-full font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-200">
+              Login
+            </a>
+          ) : oauthError ? (
+            <div className="px-6 py-3 rounded-full font-semibold text-red-400 bg-red-500/10 border border-red-500/30">
+              {oauthError}
+            </div>
+          ) : (
+            <div className="px-6 py-3 rounded-full font-semibold text-gray-400">
+              Loading...
+            </div>
+          )}
         </div>
       </GlassNav>
 
