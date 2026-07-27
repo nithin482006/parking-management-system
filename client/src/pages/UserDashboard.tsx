@@ -73,7 +73,12 @@ export default function UserDashboard() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header - Glass */}
-      <header className="glass-base sticky top-0 z-40 border-b">
+      <header className="sticky top-0 z-40 border-b" style={{
+        background: 'rgba(30, 41, 59, 0.4)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(148, 163, 184, 0.15)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1)'
+      }}>
         <div className="container flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
@@ -97,7 +102,12 @@ export default function UserDashboard() {
       {/* Main Content */}
       <main className="container py-8">
         <Tabs defaultValue="book" className="space-y-6">
-          <TabsList className="glass-base inline-flex gap-2 p-1 rounded-full">
+          <TabsList className="inline-flex gap-2 p-1 rounded-full" style={{
+            background: 'rgba(30, 41, 59, 0.4)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(148, 163, 184, 0.15)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1)'
+          }}>
             <TabsTrigger value="book" className="rounded-full px-6 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white transition-all">Book Parking</TabsTrigger>
             <TabsTrigger value="bookings" className="rounded-full px-6 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white transition-all">My Bookings</TabsTrigger>
             <TabsTrigger value="profile" className="rounded-full px-6 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white transition-all">Profile</TabsTrigger>

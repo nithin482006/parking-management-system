@@ -177,20 +177,17 @@
   }
 }
 
-@layer components {
-  /* Glass effect base */
-  .glass-base {
+/* Component styles - using plain CSS instead of @layer to avoid Tailwind 4 conflicts */
+  /* Frosted glass card */
+  .glass-card {
     background: rgba(30, 41, 59, 0.4);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(148, 163, 184, 0.15);
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.3),
       inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Frosted glass card */
-  .glass-card {
-    @apply glass-base rounded-3xl p-6;
+    border-radius: 1.875rem;
+    padding: 1.5rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
@@ -241,7 +238,13 @@
   
   /* Glass button */
   .btn-glass {
-    @apply px-6 py-3 rounded-full font-medium glass-base;
+    @apply px-6 py-3 rounded-full font-medium;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
     color: #06B6D4;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -256,7 +259,13 @@
   
   /* Glass input */
   .input-glass {
-    @apply w-full px-4 py-3 rounded-2xl glass-base text-foreground placeholder:text-muted-foreground;
+    @apply w-full px-4 py-3 rounded-2xl text-foreground placeholder:text-muted-foreground;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
@@ -270,7 +279,15 @@
   
   /* Floating stat card */
   .stat-card {
-    @apply glass-card;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    border-radius: 1.875rem;
+    padding: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
   }
   
@@ -286,7 +303,13 @@
   
   /* Data grid glass */
   .data-grid {
-    @apply glass-base rounded-2xl overflow-hidden;
+    @apply rounded-2xl overflow-hidden;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
   }
   
   .data-grid thead {
@@ -377,10 +400,16 @@
   
   /* Floating tooltip */
   .tooltip-glass {
-    @apply glass-base rounded-xl px-3 py-2 text-sm;
+    @apply rounded-xl px-3 py-2 text-sm;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
     animation: float 3s ease-in-out infinite;
   }
-}
+/* End of component styles */
 
 /* Premium animations */
 @keyframes slideInUp {
