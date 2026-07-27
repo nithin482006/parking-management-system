@@ -1,7 +1,7 @@
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { TRPCClientError } from "@trpc/client";
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getOAuthErrorMessage, isOAuthSupported } from "../oauthConfig";
 
 type UseAuthOptions = {
@@ -12,23 +12,6 @@ type UseAuthOptions = {
 export function useAuth(options?: UseAuthOptions) {
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [redirectPath, setRedirectPath] = useState<string>('');
-
-  // Initialize OAuth configuration once
-  useEffect(() => {
-    try {
-      if (options?.redirectPath) {
-        setRedirectPath(options.redirectPath);
-      } else {
-        const url = getLoginUrl();
-        setRedirectPath(url);
-        setOauthError(null);
-      }
-    } catch (error) {
-      // OAuth is not supported in this environment
-      setRedirectPath('');
-      setOauthError(getOAuthErrorMessage() || 'OAuth authentication is not available');
-    }
-  }, [options?.redirectPath]);
 
   const { redirectOnUnauthenticated = false } = options ?? {};
   const utils = trpc.useUtils();
@@ -61,6 +44,31 @@ export function useAuth(options?: UseAuthOptions) {
       await utils.auth.me.invalidate();
     }
   }, [logoutMutation, utils]);
+
+  // Initialize OAuth configuration - only when needed for unauthenticated users
+  useEffect(() => {
+    // Don't try to get login URL if user is already authenticated
+    if (meQuery.data) {
+      setOauthError(null);
+      return;
+    }
+
+    try {
+      if (options?.redirectPath) {
+        setRedirectPath(options.redirectPath);
+        setOauthError(null);
+      } else if (redirectOnUnauthenticated) {
+        // Only try to get login URL if we need to redirect unauthenticated users
+        const url = getLoginUrl();
+        setRedirectPath(url);
+        setOauthError(null);
+      }
+    } catch (error) {
+      // OAuth is not supported in this environment
+      setRedirectPath('');
+      setOauthError(getOAuthErrorMessage() || 'OAuth authentication is not available');
+    }
+  }, [options?.redirectPath, redirectOnUnauthenticated, meQuery.data]);
 
   useEffect(() => {
     if (meQuery.data) {
@@ -108,8 +116,6 @@ export function useAuth(options?: UseAuthOptions) {
     meQuery.isLoading,
     state.user,
   ]);
-
-
 
   return {
     ...state,
