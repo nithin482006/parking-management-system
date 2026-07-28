@@ -9,6 +9,17 @@ import { getLoginUrl } from "./const";
 import { isOAuthSupported, getOAuthErrorMessage } from "./_core/oauthConfig";
 import "./index.css";
 
+// Global state for unauthorized errors
+let unauthorizedErrorOccurred = false;
+
+// Make it accessible globally
+(window as any).__parkHub = {
+  getUnauthorizedErrorState: () => unauthorizedErrorOccurred,
+  resetUnauthorizedErrorState: () => {
+    unauthorizedErrorOccurred = false;
+  },
+};
+
 const queryClient = new QueryClient();
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
@@ -19,20 +30,23 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
+  // Mark that an unauthorized error occurred
+  unauthorizedErrorOccurred = true;
+
   // Check if OAuth is supported before attempting redirect
   if (!isOAuthSupported()) {
-    // Don't show error or redirect - OAuth is not available in this environment
-    // The user's session may still be valid, so don't interrupt their experience
+    // OAuth is not available - the UnauthorizedView will be shown
     return;
   }
 
   try {
     window.location.href = getLoginUrl();
   } catch (err) {
-    // OAuth redirect failed - silently fail
-    // The session may still be valid
+    // OAuth redirect failed - the UnauthorizedView will be shown
   }
 };
+
+
 
 queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {

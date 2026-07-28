@@ -133,3 +133,14 @@
 - [x] Write comprehensive test suite for chart data functions
 - [x] Test all edge cases (zero facilities, no bookings, decimal prices, etc.)
 - [x] Verify charts render correctly in admin dashboard
+
+
+## Phase 14: Unauthorized State UI
+- [x] Create UnauthorizedView component for guest users
+- [x] Display friendly "Please log in" message
+- [x] Show available features for authenticated users
+- [x] Add login button with proper OAuth redirect
+- [x] Create error boundary for unauthorized states
+- [x] Update main.tsx to show UI instead of silently failing
+- [x] Test unauthorized state on all pages
+- [x] Verify guest view displays correctly

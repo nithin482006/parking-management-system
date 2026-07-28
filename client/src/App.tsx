@@ -5,11 +5,33 @@ import HomeEnhanced from "@/pages/HomeEnhanced";
 import UserDashboard from "@/pages/UserDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import ProfileCompletion from "@/pages/ProfileCompletion";
+import UnauthorizedPage from "@/pages/UnauthorizedPage";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { useEffect, useState } from "react";
 
 function Router() {
+  const [isUnauthorized, setIsUnauthorized] = useState(false);
+
+  useEffect(() => {
+    // Check for unauthorized errors
+    const checkUnauthorized = () => {
+      const parkHub = (window as any).__parkHub;
+      if (parkHub?.getUnauthorizedErrorState?.()) {
+        setIsUnauthorized(true);
+      }
+    };
+
+    checkUnauthorized();
+    const interval = setInterval(checkUnauthorized, 100);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (isUnauthorized) {
+    return <UnauthorizedPage />;
+  }
+
   return (
     <Switch>
       <Route path={"/"} component={HomeEnhanced} />

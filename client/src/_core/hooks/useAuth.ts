@@ -2,7 +2,7 @@ import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getOAuthErrorMessage, isOAuthSupported } from "../oauthConfig";
+import { getOAuthErrorMessage } from "../oauthConfig";
 
 type UseAuthOptions = {
   redirectOnUnauthenticated?: boolean;
@@ -45,7 +45,7 @@ export function useAuth(options?: UseAuthOptions) {
     }
   }, [logoutMutation, utils]);
 
-  // Initialize OAuth configuration - only when needed for unauthenticated users
+  // Initialize OAuth configuration - always try to get login URL for unauthenticated users
   useEffect(() => {
     // Don't try to get login URL if user is already authenticated
     if (meQuery.data) {
@@ -57,8 +57,9 @@ export function useAuth(options?: UseAuthOptions) {
       if (options?.redirectPath) {
         setRedirectPath(options.redirectPath);
         setOauthError(null);
-      } else if (redirectOnUnauthenticated) {
-        // Only try to get login URL if we need to redirect unauthenticated users
+      } else {
+        // Always try to get login URL for unauthenticated users
+        // This is needed for UnauthorizedView and other guest pages
         const url = getLoginUrl();
         setRedirectPath(url);
         setOauthError(null);
@@ -68,7 +69,7 @@ export function useAuth(options?: UseAuthOptions) {
       setRedirectPath('');
       setOauthError(getOAuthErrorMessage() || 'OAuth authentication is not available');
     }
-  }, [options?.redirectPath, redirectOnUnauthenticated, meQuery.data]);
+  }, [options?.redirectPath, meQuery.data]);
 
   useEffect(() => {
     if (meQuery.data) {
