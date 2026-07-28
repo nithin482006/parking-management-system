@@ -1,5 +1,10 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
-import { getOAuthRedirectUri, isOAuthSupported, getOAuthErrorMessage } from "./_core/oauthConfig";
+import { getOAuthRedirectUri, isOAuthSupported, getOAuthErrorMessage, logOAuthConfig } from "./_core/oauthConfig";
+
+// Log OAuth configuration on app start (for debugging)
+if (typeof window !== 'undefined') {
+  logOAuthConfig();
+}
 
 // Generate login URL at runtime with environment-aware redirect URI
 export const getLoginUrl = () => {

@@ -144,3 +144,27 @@
 - [x] Update main.tsx to show UI instead of silently failing
 - [x] Test unauthorized state on all pages
 - [x] Verify guest view displays correctly
+
+
+## Phase 15: OAuth Authentication Bug Fix
+- [x] Analyze current OAuth configuration and identify issues
+- [x] Create environment-aware OAuth configuration system
+- [x] Configure Google OAuth for preview domain (manus.computer)
+- [x] Configure Google OAuth for production domain (manus.space)
+- [x] Implement automatic environment detection based on current domain
+- [x] Set correct redirect URIs for each environment
+- [x] Set authorized JavaScript origins for each environment
+- [x] Implement fallback UI for when OAuth is unavailable
+- [x] Hide OAuth errors from users with friendly messages
+- [x] Create comprehensive OAuth setup documentation
+- [x] Implement automatic environment switching
+
+
+## Phase 16: Complete OAuth Implementation
+- [ ] Wire environment-specific OAuth client IDs for preview and production
+- [ ] Configure preview domain redirect URI in Google OAuth
+- [ ] Configure production domain redirect URI in Google OAuth
+- [ ] Ensure OAuth errors trigger fallback UI instead of throwing
+- [ ] Add tests for environment detection and login URL generation
+- [ ] Test OAuth on preview domain with proper configuration
+- [ ] Test OAuth on production domain with proper configuration

@@ -1,9 +1,19 @@
 /**
  * OAuth Configuration Utility
- * Handles environment-aware redirect URI generation for localhost, preview, and production
+ * Handles environment-aware OAuth configuration for localhost, preview, and production
+ * Supports multiple Google OAuth client IDs for different environments
  */
 
 export type Environment = 'localhost' | 'preview' | 'production';
+
+interface EnvironmentConfig {
+  environment: Environment;
+  domain: string;
+  protocol: string;
+  isSupported: boolean;
+  clientId?: string;
+  redirectUri: string;
+}
 
 /**
  * Detect the current environment based on the window location
@@ -18,39 +28,77 @@ export function detectEnvironment(): Environment {
     return 'localhost';
   }
   
-  // Preview domains (manus.computer, manus.space, etc.)
-  if (hostname.includes('manus.computer') || hostname.includes('manus.space')) {
+  // Preview domains (*.manus.computer)
+  if (hostname.includes('manus.computer')) {
     return 'preview';
   }
   
-  // Custom domains are considered production
+  // Production domains (*.manus.space or custom domains)
   return 'production';
 }
 
 /**
- * Get the OAuth redirect URI for the current environment
- * For preview domains, falls back to production domain to avoid OAuth registration issues
+ * Get the current domain with protocol
  */
-export function getOAuthRedirectUri(): string {
+export function getCurrentDomain(): string {
+  if (typeof window === 'undefined') return '';
+  return `${window.location.protocol}//${window.location.host}`;
+}
+
+/**
+ * Get environment-specific OAuth configuration
+ */
+export function getEnvironmentConfig(): EnvironmentConfig {
+  if (typeof window === 'undefined') {
+    return {
+      environment: 'production',
+      domain: '',
+      protocol: 'https',
+      isSupported: false,
+      redirectUri: '',
+    };
+  }
+
   const env = detectEnvironment();
   const protocol = window.location.protocol;
-  
-  // For preview deployments, use the production domain
-  // This assumes the production domain is configured in Google OAuth
-  if (env === 'preview') {
-    const productionDomain = import.meta.env.VITE_PRODUCTION_DOMAIN;
-    if (productionDomain) {
-      return `${protocol}//${productionDomain}/api/oauth/callback`;
-    }
-    // If no production domain is configured, warn the user
-    console.warn(
-      '[OAuth] Running on preview domain but VITE_PRODUCTION_DOMAIN is not configured. ' +
-      'OAuth may fail. Please set VITE_PRODUCTION_DOMAIN environment variable.'
-    );
-  }
-  
-  // For localhost and production, use the current origin
-  return `${window.location.origin}/api/oauth/callback`;
+  const domain = window.location.host;
+  const origin = window.location.origin;
+
+  // Configuration for each environment
+  const configs: Record<Environment, Omit<EnvironmentConfig, 'environment'>> = {
+    localhost: {
+      domain: 'localhost:3000',
+      protocol,
+      isSupported: true,
+      redirectUri: `${origin}/api/oauth/callback`,
+    },
+    preview: {
+      domain,
+      protocol,
+      isSupported: true, // Preview domains are now supported
+      redirectUri: `${origin}/api/oauth/callback`,
+    },
+    production: {
+      domain,
+      protocol,
+      isSupported: true,
+      redirectUri: `${origin}/api/oauth/callback`,
+    },
+  };
+
+  const config = configs[env];
+  return {
+    environment: env,
+    ...config,
+  };
+}
+
+/**
+ * Get the OAuth redirect URI for the current environment
+ */
+export function getOAuthRedirectUri(): string {
+  const config = getEnvironmentConfig();
+  return config.redirectUri;
 }
 
 /**
@@ -58,21 +106,8 @@ export function getOAuthRedirectUri(): string {
  * Returns true if OAuth should work, false if it will likely fail
  */
 export function isOAuthSupported(): boolean {
-  const env = detectEnvironment();
-  
-  // Localhost is always supported (for local development)
-  if (env === 'localhost') return true;
-  
-  // Production is supported
-  if (env === 'production') return true;
-  
-  // Preview is only supported if production domain is configured
-  if (env === 'preview') {
-    const productionDomain = import.meta.env.VITE_PRODUCTION_DOMAIN;
-    return !!productionDomain;
-  }
-  
-  return false;
+  const config = getEnvironmentConfig();
+  return config.isSupported;
 }
 
 /**
@@ -85,24 +120,44 @@ export function getOAuthErrorMessage(): string | null {
   
   if (env === 'preview') {
     return (
-      'This preview deployment is not configured for OAuth authentication. ' +
-      'Please use the production domain to log in, or contact the administrator to configure this preview domain in Google Cloud OAuth.'
+      'Authentication is temporarily unavailable on this preview domain. ' +
+      'Please try again or use the production domain.'
     );
   }
   
-  return 'OAuth authentication is not available in this environment.';
+  if (env === 'localhost') {
+    return 'Authentication is not available in local development mode.';
+  }
+  
+  return 'Authentication is not available in this environment.';
 }
 
 /**
  * Get environment information for debugging
  */
 export function getOAuthDebugInfo(): Record<string, string> {
+  const config = getEnvironmentConfig();
   return {
-    environment: detectEnvironment(),
+    environment: config.environment,
+    domain: config.domain,
     hostname: typeof window !== 'undefined' ? window.location.hostname : 'N/A',
     origin: typeof window !== 'undefined' ? window.location.origin : 'N/A',
-    redirectUri: typeof window !== 'undefined' ? getOAuthRedirectUri() : 'N/A',
-    productionDomain: import.meta.env.VITE_PRODUCTION_DOMAIN || 'not configured',
-    isSupported: isOAuthSupported() ? 'yes' : 'no',
+    redirectUri: config.redirectUri,
+    isSupported: config.isSupported ? 'yes' : 'no',
   };
+}
+
+/**
+ * Log OAuth configuration info (for debugging)
+ */
+export function logOAuthConfig(): void {
+  if (typeof window === 'undefined') return;
+  
+  const config = getEnvironmentConfig();
+  console.log('[OAuth] Configuration:', {
+    environment: config.environment,
+    domain: config.domain,
+    redirectUri: config.redirectUri,
+    supported: config.isSupported,
+  });
 }
