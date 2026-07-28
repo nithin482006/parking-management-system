@@ -29,7 +29,7 @@ export default function Home() {
             </div>
             <span className="font-bold text-lg text-slate-900">ParkHub</span>
           </div>
-          <a href={getLoginUrl()} className="btn-primary">
+          <a href={getLoginUrl() || '#'} className="btn-primary">
             Login
           </a>
         </div>
@@ -48,7 +48,7 @@ export default function Home() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <a href={getLoginUrl()} className="btn-primary inline-flex items-center justify-center gap-2">
+              <a href={getLoginUrl() || '#'} className="btn-primary inline-flex items-center justify-center gap-2">
                 Get Started <ArrowRight className="w-4 h-4" />
               </a>
               <button className="btn-secondary">Learn More</button>
@@ -140,7 +140,7 @@ export default function Home() {
         <Card className="card-elevated bg-gradient-to-r from-blue-600 to-blue-700 border-0 p-12 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
           <p className="text-blue-100 text-lg mb-8">Join thousands of users managing their parking efficiently</p>
-          <a href={getLoginUrl()} className="inline-flex items-center gap-2 px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+          <a href={getLoginUrl() || '#'} className="inline-flex items-center gap-2 px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
             Start Now <ArrowRight className="w-4 h-4" />
           </a>
         </Card>

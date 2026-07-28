@@ -11,7 +11,7 @@ type UseAuthOptions = {
 
 export function useAuth(options?: UseAuthOptions) {
   const [oauthError, setOauthError] = useState<string | null>(null);
-  const [redirectPath, setRedirectPath] = useState<string>('');
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   const { redirectOnUnauthenticated = false } = options ?? {};
   const utils = trpc.useUtils();

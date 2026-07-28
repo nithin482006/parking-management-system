@@ -40,7 +40,11 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
   }
 
   try {
-    window.location.href = getLoginUrl();
+    const loginUrl = getLoginUrl();
+    if (loginUrl) {
+      window.location.href = loginUrl;
+    }
+    // If loginUrl is null, OAuth is not supported - the UnauthorizedView will be shown
   } catch (err) {
     // OAuth redirect failed - the UnauthorizedView will be shown
   }

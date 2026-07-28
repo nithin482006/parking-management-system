@@ -3,7 +3,7 @@ import { GlassCard, GlassNav } from "@/components/GlassCard";
 import { MapPin, Lock, LogIn, ArrowRight, CheckCircle2, Clock, DollarSign } from "lucide-react";
 
 interface UnauthorizedViewProps {
-  loginUrl?: string;
+  loginUrl?: string | null;
   oauthError?: string | null;
 }
 

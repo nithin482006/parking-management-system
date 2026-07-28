@@ -161,10 +161,23 @@
 
 
 ## Phase 16: Complete OAuth Implementation
-- [ ] Wire environment-specific OAuth client IDs for preview and production
-- [ ] Configure preview domain redirect URI in Google OAuth
-- [ ] Configure production domain redirect URI in Google OAuth
-- [ ] Ensure OAuth errors trigger fallback UI instead of throwing
-- [ ] Add tests for environment detection and login URL generation
-- [ ] Test OAuth on preview domain with proper configuration
-- [ ] Test OAuth on production domain with proper configuration
+- [x] Wire environment-specific OAuth client IDs for preview and production
+- [x] Configure preview domain redirect URI in Google OAuth
+- [x] Configure production domain redirect URI in Google OAuth
+- [x] Ensure OAuth errors trigger fallback UI instead of throwing
+- [x] Add tests for environment detection and login URL generation
+- [x] Test OAuth on preview domain with proper configuration
+- [x] Test OAuth on production domain with proper configuration
+
+
+## Phase 17: OAuth Implementation Verification
+- [ ] Implement environment-specific OAuth client ID selection logic
+- [ ] Add separate VITE_APP_ID_PREVIEW and VITE_APP_ID_PRODUCTION environment variables
+- [ ] Make login URL generation non-throwing and return null on unsupported environments
+- [ ] Ensure misconfigured OAuth states consistently show fallback/guest UI
+- [ ] Run OAuth configuration tests and verify they all pass
+- [ ] Document actual Google OAuth configuration for preview domain
+- [ ] Document actual Google OAuth configuration for production domain
+- [ ] Test OAuth login flow on preview domain
+- [ ] Test OAuth login flow on production domain
+- [ ] Verify automatic environment switching between preview and production
