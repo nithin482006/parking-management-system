@@ -45,11 +45,17 @@ export function useAuth(options?: UseAuthOptions) {
     }
   }, [logoutMutation, utils]);
 
-  // Initialize OAuth configuration - always try to get login URL for unauthenticated users
+  // Initialize OAuth configuration - only for unauthenticated users
   useEffect(() => {
     // Don't try to get login URL if user is already authenticated
     if (meQuery.data) {
       setOauthError(null);
+      setRedirectPath('');
+      return;
+    }
+
+    // Only initialize OAuth if we haven't already checked
+    if (meQuery.isLoading) {
       return;
     }
 
@@ -58,7 +64,7 @@ export function useAuth(options?: UseAuthOptions) {
         setRedirectPath(options.redirectPath);
         setOauthError(null);
       } else {
-        // Always try to get login URL for unauthenticated users
+        // Try to get login URL for unauthenticated users
         // This is needed for UnauthorizedView and other guest pages
         const url = getLoginUrl();
         setRedirectPath(url);
@@ -69,7 +75,7 @@ export function useAuth(options?: UseAuthOptions) {
       setRedirectPath('');
       setOauthError(getOAuthErrorMessage() || 'OAuth authentication is not available');
     }
-  }, [options?.redirectPath, meQuery.data]);
+  }, [options?.redirectPath, meQuery.data, meQuery.isLoading]);
 
   useEffect(() => {
     if (meQuery.data) {
