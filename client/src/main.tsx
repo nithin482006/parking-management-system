@@ -21,18 +21,16 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   // Check if OAuth is supported before attempting redirect
   if (!isOAuthSupported()) {
-    const errorMsg = getOAuthErrorMessage();
-    console.error('[OAuth] Cannot redirect to login:', errorMsg);
-    // Show error to user instead of redirecting
-    alert(errorMsg || 'Authentication is not available in this environment');
+    // Don't show error or redirect - OAuth is not available in this environment
+    // The user's session may still be valid, so don't interrupt their experience
     return;
   }
 
   try {
     window.location.href = getLoginUrl();
   } catch (err) {
-    console.error('[OAuth] Failed to redirect to login:', err);
-    alert('Authentication configuration error. Please contact support.');
+    // OAuth redirect failed - silently fail
+    // The session may still be valid
   }
 };
 
@@ -40,7 +38,6 @@ queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
-    console.error("[API Query Error]", error);
   }
 });
 
@@ -48,7 +45,6 @@ queryClient.getMutationCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.mutation.state.error;
     redirectToLoginIfUnauthorized(error);
-    console.error("[API Mutation Error]", error);
   }
 });
 
